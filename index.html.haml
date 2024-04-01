@@ -62,7 +62,7 @@ title: Hibernate. Everything data.
             %h3.ui.header
               %a{:href => relative("/reactive/")} Hibernate Reactive
             %p
-              %i.big.icon.retweet
+              %i.big.icon.flask
               Reactive domain model persistence for relational databases.
             .ui.right.aligned.basic.segment
               %a.ui.button.right.labeled.icon.a.primary{:href => relative("/reactive/")}
@@ -72,26 +72,38 @@ title: Hibernate. Everything data.
         .ui.raised.segment.tools
           .project
             %h3.ui.header
-              %a{:href => relative("/tools/")} Hibernate Tools
+              %a{:href => relative("/repositories/")} Data Repositories
             %p
-              %i.big.icon.wrench
-              Command line tools and IDE plugins for your Hibernate usages.
+              %i.big.icon.university
+              A simplified programming model based on Jakarta Data.
             .ui.right.aligned.basic.segment
-              %a.ui.button.right.labeled.icon.a.primary{:href => relative("/tools/")}
+              %a.ui.button.right.labeled.icon.a.primary{:href => relative("/repositories/")}
                 %i.right.arrow.icon
                 More
       .column
         .ui.raised.segment.tools
           .project
             %h3.ui.header
-              %a{:href => relative("/others/")} Others
+              %a{:href => relative("/tools/")} Hibernate Tools
             %p
-              %i.big.icon.retweet
-              Other Hibernate related projects (e.g. Hibernate OGM, Hibernate Shards).
+              %i.big.icon.wrench
+              Command line tools and IDE plugins.
             .ui.right.aligned.basic.segment
-              %a.ui.button.right.labeled.icon.a.primary{:href => relative("/others/")}
+              %a.ui.button.right.labeled.icon.a.primary{:href => relative("/tools/")}
                 %i.right.arrow.icon
                 More
+      -# .column
+      -#   .ui.raised.segment.tools
+      -#     .project
+      -#       %h3.ui.header
+      -#         %a{:href => relative("/others/")} Others
+      -#       %p
+      -#         %i.big.icon.retweet
+      -#         Other Hibernate related projects (e.g. Hibernate OGM, Hibernate Shards).
+      -#       .ui.right.aligned.basic.segment
+      -#         %a.ui.button.right.labeled.icon.a.primary{:href => relative("/others/")}
+      -#           %i.right.arrow.icon
+      -#           More
       .column
 
 :javascript
@@ -146,7 +158,12 @@ title: Hibernate. Everything data.
             }
             else if ( entry.tags.includes('Hibernate Reactive') ) {
               ribbonText = 'Hibernate Reactive';
-              ribbonIcon = 'retweet';
+              ribbonIcon = 'flask';
+            }
+            else if ( entry.tags.includes('Hibernate Data Repositories')
+                   || entry.tags.includes('Jakarta Data') ) {
+              ribbonText = 'Hibernate Data Repositories';
+              ribbonIcon = 'university';
             }
           }
 

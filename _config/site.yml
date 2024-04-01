@@ -559,7 +559,7 @@ projects:
     name: Hibernate Reactive
     description: |
       Add a reactive API to Hibernate ORM, supporting non-blocking database drivers and a reactive style of interaction with the database.
-    icon: 'icon-retweet'
+    icon: 'icon-flask'
     links:
       reference_doc:
         html: /reactive/documentation/{series.version}/reference/html_single/
@@ -636,7 +636,82 @@ projects:
           href: 'https://github.com/hibernate/hibernate-reactive/actions'
           css_class: 'treatment'
 
- #other projects would come here
+  ##################################################################################################
+  # Data Repositories
+  ##################################################################################################
+  repositories:
+    name: Hibernate Data Repositories
+    description: |
+      Hibernate Data Repositories offers a simpler and more type-safe programming model, and an implementation of Jakarta Data. 
+      Find your mistakes at compilation time.
+    icon: 'icon-university'
+    links:
+      reference_doc:
+        html: /orm/documentation/{series.version}/reference/html_single/
+        latest_stable:
+          html: /orm/documentation/{series.version}/reference/html_single/
+      javadoc:
+        html: /orm/documentation/{series.version}/javadocs/
+        latest_stable:
+          html: /orm/documentation/{series.version}/javadocs/
+      getting_started_guide:
+        html: /orm/documentation/{series.version}/reference/html_single/#getting-started
+      dist:
+    maven:
+      coord:
+        group_id: org.hibernate.orm
+        main_artifact_id: hibernate-processor
+      repo:
+        releases: central
+        snapshots: jboss
+    blog_tag: Jakarta Data
+    blog_tag_url: jakarta-data
+#    blog_tag: Hibernate Data Repositories
+#    blog_tag_url: hibernate-data-repositories
+    license:
+      name: ASL v2
+      url: https://raw.githubusercontent.com/hibernate/hibernate-orm/main/LICENSE
+    jira:
+      key:
+    github:
+      project: hibernate-orm
+    integrations:
+      java:
+        name: Java
+        url: https://www.oracle.com/technetwork/java/javase/downloads/index.html
+      orm:
+        name: Hibernate ORM
+        url: /orm/
+    menu:
+      intern:
+        - name: About
+          href: '/repositories/'
+          css_class: 'home'
+        - name: Releases
+          href: '/orm/releases/'
+          css_class: 'tags'
+          releases_submenu: true
+        - name: Documentation
+          href: '/orm/documentation/'
+          css_class: 'book'
+      extern:
+        - name: Source code
+          href: 'https://github.com/hibernate/hibernate-orm'
+          css_class: 'code'
+        - name: Issue tracker
+          href: 'https://hibernate.atlassian.net/browse/HHH'
+          css_class: 'bug'
+        - name: Security issue
+          href: 'https://access.redhat.com/security/team/contact/'
+          css_class: 'lock'
+        - name: Forum
+          href: 'https://discourse.hibernate.org/c/hibernate-orm'
+          css_class: 'comments'
+        - name: CI
+          href: 'https://github.com/hibernate/hibernate-orm/actions'
+          css_class: 'treatment'
+
+  #other projects would come here
 
 ####################################################################################################
 # Asciidoctor config
