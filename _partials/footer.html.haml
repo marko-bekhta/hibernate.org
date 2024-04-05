@@ -25,9 +25,11 @@
           %a.item{:href => "#{site.forum.base_url}", :title => "Submit a bug"} Our forums
           %a.item{:href => "https://access.redhat.com/security/team/contact/", :title => "Report a security issue"} Report a security issue
           %a.item{:href => "#{relative("/community/license", real_page)}", :title => "License"} License
-      .five.wide.column.sponsor
+      .five.wide.sponsor
         %a.logo.redhat(href="https://www.redhat.com/")
           %img{:src => "/images/sponsored-by-redhat.svg", :title => "Red Hat"}
+        %a.logo.commonhaus(href="https://www.commonhaus.com/")
+          %img{:src => "/images/CF_logo_horizontal_reverse.svg", :title => "Commonhaus Foundation"}
         -#%a.logo.redhatdevelopers(href="https://developers.redhat.com/")
           %img{:src => "#{relative("/images/redhat-developers.png", real_page)}", :title => "Red Hat Developers", :width => 216, :height => 48}
  
