@@ -13,7 +13,7 @@ module Awestruct
         html += %Q(  function gtag(){dataLayer.push(arguments);}\n)
         html += %Q(  gtag('js', new Date());\n)
         html += %Q(\n)
-        html += %Q(  gtag('config', '#{options[:id]}');\n)
+        html += %Q(  gtag('config', '#{options[:id]}', { cookie_flags: 'SameSite=None;Secure' }));\n)
         html += %Q(</script>\n)
 
         html
