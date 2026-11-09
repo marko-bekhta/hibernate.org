@@ -17,6 +17,88 @@ WORK_DIR="$(mktemp -d)"
 trap 'rm -rf "${WORK_DIR}"' EXIT
 
 # ---------------------------------------------------------------------------
+# Call the GitHub API, retrying transient failures and rate-limit responses
+# ---------------------------------------------------------------------------
+gh_api_with_retry() {
+    local endpoint="$1"
+    shift
+
+    local max_attempts=3
+    local base_delay_seconds=5
+    local max_retry_seconds=60
+    local attempt http_output http_status
+    local retry_after retry_delay_seconds response_body request_succeeded
+
+    if [[ "$endpoint" != search/* && "$endpoint" != repos/* ]]; then
+        printf '%s\n' 'GitHub API request refused: unsupported endpoint'
+        return 1
+    fi
+
+    for (( attempt=1; attempt<=max_attempts; attempt++ )); do
+        http_output=""
+        http_status=""
+        request_succeeded=false
+        if http_output=$(gh api "$endpoint" --include "$@" 2>/dev/null); then
+            request_succeeded=true
+        fi
+
+        http_status=$(awk 'NR == 1 {
+                if ($1 ~ /^HTTP\// && $2 ~ /^[0-9][0-9][0-9]$/) print $2
+            }' <<< "$http_output")
+
+        if [[ "$request_succeeded" == true ]]; then
+            if [[ ! "$http_status" =~ ^[0-9][0-9][0-9]$ ]]; then
+                printf '%s\n' 'GitHub API response rejected: invalid status line'
+                return 1
+            fi
+            if ! response_body=$(awk '!body && $0 ~ /^\r?$/ { body = 1; next } body { print } END { exit body ? 0 : 1 }' <<< "$http_output"); then
+                printf '%s\n' 'GitHub API response rejected: missing header/body separator'
+                return 1
+            fi
+            printf '%s\n' "$response_body"
+            return 0
+        fi
+
+        if (( attempt >= max_attempts )); then
+            break
+        fi
+
+        case "$http_status" in
+            408 | 429 | 5??) ;;
+            *) break ;;
+        esac
+
+        retry_after=$(awk 'tolower($0) ~ /^retry-after:/ && !seen {
+                sub(/^[^:]*:/, "")
+                gsub(/[[:space:]]/, "")
+                print
+                seen = 1
+            }' <<< "$http_output")
+        retry_delay_seconds=$(( base_delay_seconds * attempt ))
+        if [[ "$retry_after" =~ ^[0-9]{1,9}$ ]]; then
+            if (( retry_after >= max_retry_seconds )); then
+                retry_delay_seconds="$max_retry_seconds"
+            else
+                retry_delay_seconds="$retry_after"
+            fi
+        fi
+        if (( retry_delay_seconds > max_retry_seconds )); then
+            retry_delay_seconds="$max_retry_seconds"
+        fi
+
+        echo "  WARNING: GitHub API call failed (attempt ${attempt}/${max_attempts}); retrying in ${retry_delay_seconds}s" >&2
+        sleep "$retry_delay_seconds"
+    done
+
+    if [[ "$http_status" =~ ^[0-9][0-9][0-9]$ ]]; then
+        printf 'GitHub API request failed (HTTP %s)\n' "$http_status"
+    else
+        printf '%s\n' 'GitHub API request failed (network or CLI error)'
+    fi
+    return 1
+}
+
+# ---------------------------------------------------------------------------
 # Utility: compare dotted numeric version strings
 # Returns 0 if $1 > $2, 1 otherwise
 # ---------------------------------------------------------------------------
@@ -248,8 +330,8 @@ find_series_file() {
 discover_liberty_hv_bundles() {
     local github_repo="$1"
     local api_output
-    if ! api_output=$(gh api "search/code?q=org.hibernate.validator+repo:${github_repo}+filename:bnd.bnd" \
-        --jq '.items[].path' 2>&1); then
+    if ! api_output=$(gh_api_with_retry "search/code?q=org.hibernate.validator+repo:${github_repo}+filename:bnd.bnd" \
+        --jq '.items[].path'); then
         echo "  WARNING: Could not discover bundles via code search: ${api_output}" >&2
         echo "  Checking configured paths only" >&2
         return 1
@@ -312,8 +394,8 @@ check_liberty_integration() {
         feature=$(yq -r ".integrations.${integration_id}.resolve[$i].feature" "$CONFIG_FILE")
 
         local file_content
-        if ! file_content=$(gh api "repos/${github_repo}/contents/${path}" \
-            -H "Accept: application/vnd.github.raw+json" 2>&1); then
+        if ! file_content=$(gh_api_with_retry "repos/${github_repo}/contents/${path}" \
+            -H "Accept: application/vnd.github.raw+json"); then
             echo "  WARNING: Failed to fetch ${path}: ${file_content}" >&2
             continue
         fi
@@ -357,8 +439,8 @@ check_liberty_integration() {
     # Step 3: Check if latest Liberty release is newer than max tracked version
     echo "  Checking for newer Liberty releases..."
     local releases_output
-    if ! releases_output=$(gh api "repos/${github_repo}/releases" --jq \
-        '[.[] | select(.prerelease == false and .draft == false)][0].tag_name' 2>&1); then
+    if ! releases_output=$(gh_api_with_retry "repos/${github_repo}/releases" --jq \
+        '[.[] | select(.prerelease == false and .draft == false)][0].tag_name'); then
         echo "  WARNING: Could not determine latest Liberty release: ${releases_output}" >&2
     elif [[ -n "$releases_output" ]]; then
         local latest_version="${releases_output#gm-}"
